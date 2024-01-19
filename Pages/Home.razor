@@ -1,0 +1,55 @@
+﻿@page "/"
+
+<PageTitle>Minesweeper</PageTitle>
+
+<div class="container">
+    <div class="gamesetup">
+        @if (mines == 10)
+        {
+            <button class="btn btn-primary active" @onclick="(() => StartEasyGame())">Easy</button>
+        }
+        else
+        {
+            <button class="btn btn-secondary" @onclick="(() => StartEasyGame())">Easy</button>
+        }
+        @if (mines == 20)
+        {
+            <button class="btn btn-primary active" @onclick="(() => StartMediumGame())">Medium</button>
+        }
+        else
+        {
+            <button class="btn btn-secondary" @onclick="(() => StartMediumGame())">Medium</button>
+        }
+        @if (mines == 30)
+        {
+            <button class="btn btn-primary active" @onclick="(() => StartHardGame())">Hard</button>
+        }
+        else
+        {
+            <button class="btn btn-secondary" @onclick="(() => StartHardGame())">Hard</button>
+        }
+    </div>
+    <GameField GridWidth="10" TotalMines="@mines" />
+</div>
+
+@code {
+    private int mines = 10;
+
+    private void StartEasyGame()
+    {
+        mines = 10;
+        Console.WriteLine("StartEasyGame: Reset game");
+    }
+
+    private void StartMediumGame()
+    {
+        mines = 20;
+        Console.WriteLine("StartMediumGame: Reset game");
+    }
+
+    private void StartHardGame()
+    {
+        mines = 30;
+        Console.WriteLine("StartHardGame: Reset game");
+    }
+}
