@@ -1,7 +1,7 @@
 @page "/gamefield"
 @implements IDisposable
 
-@if (!inizialized)
+@if (!initialized)
 {
     <div class="spinner-border text-primary" role="status">
         <span class="sr-only">Loading...</span>
@@ -30,7 +30,7 @@ else
             @GameClassificationString in progress @clock
         </div>
     }
-    <div class="grid">
+    <div class="grid @GetAdditionalGridClass()">
         @foreach (var square in _shuffledSquares)
         {
             <div id="@square.Id" class="@square.Class" @onclick="(() => OnClick(square))" @oncontextmenu="(() => OnRightClick(square))" @oncontextmenu:preventDefault="true">
@@ -49,24 +49,27 @@ else
 }
 
 @code {
-    [Parameter]
-    public int TotalMines { get; set; } = 20;
+    [Parameter] public int TotalMines { get; set; } = 20;
     private int _totalMines = 20;
 
-    [Parameter]
-    public int GridWidth { get; set; } = 10;
+    [Parameter] public int GridWidth { get; set; } = 10;
     private int _gridWidth = 10;
+
+    [Parameter] public int GridHeight { get; set; } = 10;
+    private int _gridHeight = 10;
+    [Parameter] public GameType GameType { get; set; }
+    private GameType _gameType;
 
     bool gameOver = false;
     bool gameWin = false;
-    bool inizialized = false;
+    bool initialized = false;
     Timer? clockTimer;
 
     private List<GameGridSquare> _shuffledSquares = new List<GameGridSquare>();
 
     private int usedFlags = 0;
     private int FlagsLeft { get { return (TotalMines != 0) ? TotalMines - usedFlags : 0; } }
-    private int TotalSquares { get { return (GridWidth != 0) ? GridWidth * GridWidth : 0; } }
+    private int TotalSquares { get { return (GridWidth != 0) ? GridWidth * GridHeight : 0; } }
     private int ReveledSquares { get { return _shuffledSquares.Where(x => x.IsRevealed).Count(); } }
     private string GameClassificationString { get { return TotalMines == 10 ? "Easy game" : TotalMines == 20 ? "Medium game" : "Hard game"; } }
     private string clock = "00:00:00";
@@ -94,9 +97,25 @@ else
             Console.WriteLine($"{square.Id}: {square.Type}, class: {square.Class}");
         } *@
 
-        inizialized = true;
+        initialized = true;
     }
 
+    private string GetAdditionalGridClass()
+    {
+        if (_gameType == GameType.Easy)
+        {
+            return "";
+        }
+        if (_gameType == GameType.Medium)
+        {
+            return "medium";
+        }
+        if (_gameType == GameType.Hard)
+        {
+            return "hard";
+        }
+        return "";
+    }
     public void ResetGame()
     {
         gameOver = false;
@@ -129,6 +148,9 @@ else
 
     private List<GameGridSquare> GetShuffledSquareList(int totalMines, int totalSquares)
     {
+        Console.WriteLine("--- GetShuffledSquareList ---------------------------------------------------------------");
+        Console.WriteLine($"TotalMines: {totalMines}, TotalSquares: {totalSquares}");
+
         List<GameGridSquare> list = new List<GameGridSquare>();
         
         // Initialize the mines
@@ -364,20 +386,34 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
-        Console.WriteLine("OnParametersSetAsync");
-
         if (_gridWidth != GridWidth)
         {
-            _gridWidth = GridWidth;
+            Console.WriteLine("--- OnParametersSetAsync ----------------------------------------------------------------");
+            Console.WriteLine($"GridWidth: {_gridWidth}, GridHeight: {_gridHeight}, TotalMines: {_totalMines}");
             ResetGame();
-            Console.WriteLine("GridWidth parameter has changed");
+        }
+
+         if (_gridHeight != GridHeight)
+        {
+            Console.WriteLine("--- OnParametersSetAsync ----------------------------------------------------------------");
+            Console.WriteLine($"GridWidth: {_gridWidth}, GridHeight: {_gridHeight}, TotalMines: {_totalMines}, GameType: {_gameType}");
+            _gridHeight = GridHeight;
+            ResetGame();
         }
 
         if (_totalMines != TotalMines)
         {
+            Console.WriteLine("--- OnParametersSetAsync ----------------------------------------------------------------");
+            Console.WriteLine($"GridWidth: {_gridWidth}, GridHeight: {_gridHeight}, TotalMines: {_totalMines}, GameType: {_gameType}");
             _totalMines = TotalMines;
             ResetGame();
-            Console.WriteLine("TotalMines parameter has changed");
+        }
+
+        if (_gameType != GameType)
+        {
+            Console.WriteLine("--- OnParametersSetAsync ----------------------------------------------------------------");
+            Console.WriteLine($"GridWidth: {_gridWidth}, GridHeight: {_gridHeight}, TotalMines: {_totalMines}, GameType: {_gameType}");
+            _gameType = GameType;
         }
 
         await base.OnParametersSetAsync();
